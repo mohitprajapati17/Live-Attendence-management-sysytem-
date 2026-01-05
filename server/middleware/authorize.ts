@@ -22,10 +22,10 @@ export  const authorize=(role: string,req: Request,res: Response,next: Function)
    next();
 };
 
-export  const restricTo = (role: string) => {
+export  const restricTo = (roles: string[]) => {
     return (req: Request, res: Response, next: Function) => {
         const user = (req as any).user;
-        if(user && user.role === role) {
+        if(user && roles.includes(user.role)) {
             next();
         } else {
             return res.status(403).json({ message: 'Forbidden. Insufficient permissions.' });
