@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import Class from '../schema.ts/Class';
 import { getProfile } from './userController';
 import mongoose from 'mongoose';
+import User from '../schema.ts/user';
 
 export const createClass = async (req: Request, res: Response) => {
     const profileResult = getProfile(req, res);
@@ -16,7 +17,58 @@ export const createClass = async (req: Request, res: Response) => {
     } catch (error: any) {
         return res.status(500).json({ message: 'Error creating class', error: error.message });
     }
-    
 
 };
+
+export const addStudent = async (req: Request, res: Response , StudentId: string) => {
+    const classId = req.params.classId;
+    const classDoc = await Class.findById(classId);
+    const teacherId = classDoc?.teacherId;
+
+    const profileResult = getProfile(req, res);
+    const userId = (profileResult as any).user.userId;
+
+    if(teacherId!==userId){
+        return res.status(403).json({ message: 'Unauthorized: Only the teacher can add students' });
+    }
+    try{
+        const newClass=await Class.findByIdAndUpdate(classId, { $push: { studentIds: StudentId } }, { new: true });
+        return res.status(200).json({ message: 'Student added successfully', class: newClass });
+    } catch (error: any) {
+        return res.status(500).json({ message: 'Error adding student', error: error.message });
+    }
+    
+}
+
+export const getClass=async(req:Request,res:Response, id:string)=>{
+    try {
+        const classDoc = await Class.findById(id).populate('studentIds');
+        if(!classDoc){
+            return res.status(404).json({ message: 'Class not found' });
+        }
+        return res.status(200).json({ 
+            _id: classDoc._id,
+            teacherId: classDoc.teacherId,
+            className: classDoc.className,
+            studentIds: classDoc.studentIds
+        });
+    } catch (error: any) {
+        return res.status(500).json({ message: 'Error fetching class', error: error.message });
+    }
+}
+
+export const getStudent=async(req: Request, res: Response)=>{
+    try{
+        const data=await User.find({ role: 'student' });
+        return res.status(200).json({ students: data });
+
+
+    } catch (error: any) {
+        return res.status(500).json({ message: 'Error fetching students', error: error.message });
+    }
+    
+
+}
+
+
 
