@@ -4,6 +4,7 @@ import Class from '../schema.ts/Class';
 import { getProfile } from './userController';
 import mongoose from 'mongoose';
 import User from '../schema.ts/user';
+import Attendence from 'schema.ts/Attendence';
 
 export const createClass = async (req: Request, res: Response) => {
     const profileResult = getProfile(req, res);
@@ -68,6 +69,27 @@ export const getStudent=async(req: Request, res: Response)=>{
     }
     
 
+
+
+}
+
+export const myAttendenceByClassId=async(req:Request,res:Response,classId:string,studentId:mongoose.Types.ObjectId)=>{
+    const classData=await Class.findById(classId);
+    if(!classData){
+        return res.status(404).json({ message: 'Class not found' });
+    }
+
+    if(!classData.studentIds.includes(studentId)){
+        return res.status(404).json({ message: 'Student not found in class' });
+    }
+
+    try{
+        const attendence=await Attendence.find({classId, studentId})
+        return res.status(200).json({ message: 'Attendence retrieved successfully', attendence });
+    } catch (error: any) {
+        return res.status(500).json({ message: 'Error fetching attendence', error: error.message });
+    }
+    
 }
 
 

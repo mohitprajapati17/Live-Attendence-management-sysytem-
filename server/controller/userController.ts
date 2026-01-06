@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import User from '../schema.ts/user';
 import jwt from 'jsonwebtoken';
+import Class from '../schema.ts/class';
+import mongoose from 'mongoose';
 
 export const Signup = async (req: Request, res: Response) => {
     const {name,email,password,role}=req.body;
@@ -50,3 +52,4 @@ export const getProfile = (req: Request, res: Response) => {
         return res.status(401).json({ message: 'Invalid token' });
     }
 }
+
