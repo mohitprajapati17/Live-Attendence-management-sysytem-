@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 import User from '../schema.ts/user';
 import Attendence from '../schema.ts/Attendence';
 import jwt from 'jsonwebtoken';
-import { activeSession } from '../state/activeSession';
+import { getActiveSession, startActiveSession } from '../state/activeSession';
 
 export const createClass = async (req: Request, res: Response) => {
     const profileResult = getProfile(req, res);
@@ -20,10 +20,10 @@ export const createClass = async (req: Request, res: Response) => {
     } catch (error: any) {
         return res.status(500).json({ message: 'Error creating class', error: error.message });
     }
-
 };
 
-export const addStudent = async (req: Request, res: Response , StudentId: string) => {
+export const addStudent = async (req: Request, res: Response) => {
+    const studentId = req.body.studentId;
     const classId = req.params.classId;
     const classDoc = await Class.findById(classId);
     const teacherId = classDoc?.teacherId;
@@ -35,7 +35,7 @@ export const addStudent = async (req: Request, res: Response , StudentId: string
         return res.status(403).json({ message: 'Unauthorized: Only the teacher can add students' });
     }
     try{
-        const newClass=await Class.findByIdAndUpdate(classId, { $push: { studentIds: StudentId } }, { new: true });
+        const newClass=await Class.findByIdAndUpdate(classId, { $push: { studentIds: studentId } }, { new: true });
         return res.status(200).json({ message: 'Student added successfully', class: newClass });
     } catch (error: any) {
         return res.status(500).json({ message: 'Error adding student', error: error.message });
@@ -43,7 +43,8 @@ export const addStudent = async (req: Request, res: Response , StudentId: string
     
 }
 
-export const getClass=async(req:Request,res:Response, id:string)=>{
+export const getClass=async(req:Request,res:Response)=>{
+    const id=req.params.id;
     try {
         const classDoc = await Class.findById(id).populate('studentIds');
         if(!classDoc){
@@ -75,7 +76,9 @@ export const getStudent=async(req: Request, res: Response)=>{
 
 }
 
-export const myAttendenceByClassId=async(req:Request,res:Response,classId:string,studentId:mongoose.Types.ObjectId)=>{
+export const myAttendenceByClassId=async(req:Request,res:Response)=>{
+    const classId=req.params.id;
+    const studentId=(req as any).user._id;
     const classData=await Class.findById(classId);
     if(!classData){
         return res.status(404).json({ message: 'Class not found' });
@@ -103,29 +106,23 @@ export const attendenceStart = async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'Class not found' });
         }
 
-        // Get the token from the Authorization header
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            return res.status(401).json({ message: 'No token provided' });
+        const userId = ((req as any).user?._id);
+        if(!userId){
+            return res.status(401).json({ message: 'No user found' });
+        }
+        if(userId!==classData.teacherId.toString()){
+            return res.status(403).json({ message: 'You are not authorized to start attendance for this class' });
+        }
+
+        if(getActiveSession()){
+            return res.status(400).json({ message: "Attendance already running" });
         }
 
         try {
-            // Verify the token and get the user data
-            const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { _id: string }; // Add proper type for the decoded token
             
-            // Now you can use decoded._id as the userId
-            const userId = decoded._id;
-            if(userId!==classData.teacherId.toString()){
-                return res.status(403).json({ message: 'You are not authorized to start attendance for this class' });
-            }
-
-            activeSession.classId = classId;
-            activeSession.startedAt = new Date();
-            activeSession.attendence = {};
-
-            // Rest of your code..
-            // save activeSession to database
-            return res.status(200).json({ message: 'Attendance started successfully',activeSession });
+            const session = startActiveSession(classId);
+            return res.status(200).json({ message: 'Attendance started successfully', session });
+            
         } catch (error) {
             console.error('Token verification error:', error);
             return res.status(401).json({ message: 'Invalid token' });
