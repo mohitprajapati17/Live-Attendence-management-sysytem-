@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken'
 
 export  const authorize=(role: string,req: Request,res: Response,next: Function) => {
     let token =req.headers.authorization;

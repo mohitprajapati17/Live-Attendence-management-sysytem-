@@ -5,7 +5,7 @@ import { getProfile } from './userController';
 import mongoose from 'mongoose';
 import User from '../schema.ts/user';
 import Attendence from '../schema.ts/Attendence';
-import jwt from 'jsonwebtoken';
+// import jwt from 'jsonwebtoken';
 import { getActiveSession, startActiveSession } from '../state/activeSession';
 
 export const createClass = async (req: Request, res: Response) => {

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import User from '../schema.ts/user';
 import jwt from 'jsonwebtoken';
-import Class from '../schema.ts/class';
+// import Class from ''
 import mongoose from 'mongoose';
 
 export const Signup = async (req: Request, res: Response) => {
