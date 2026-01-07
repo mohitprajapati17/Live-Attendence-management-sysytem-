@@ -5,12 +5,12 @@ const router = express.Router();
 
 router.post("class/", createClass);
 router.post("class/:id/add-student", addStudent);
-router.get("class/:id", getClass);
+router.get("/", getClass);
 router.get("class/students", getStudent);
-router.get("class/:id/my-attendence",myAttendenceByClassId)
+router.get("/",myAttendenceByClassId);
 router.post("/attendence/start",attendenceStart)
 
-
+export const classRouter=router;
 
 
 
