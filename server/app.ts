@@ -30,8 +30,8 @@ export const initWebSocket=()=>{
 
         const decoded=jwt.verify(token, process.env.JWT_SECRET!);
         console.log("Decoded", decoded);
-        (io as any).user = decoded;
-        if((io as any).user.role === "teacher"){
+        (socket as any).user = decoded;
+        if((socket as any).user.role === "teacher"){
             socket.on("start-class", (classId:string) => {
                 console.log("Start class", classId);
                 socket.broadcast.emit("start-class", classId);
@@ -67,7 +67,7 @@ app.use("class/:id",authorize,restricTo(["teacher","student"]),classRouter);
 app.use("/class/:id/my-attendence",authorize,restricTo(["student"]),classRouter);
 
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
