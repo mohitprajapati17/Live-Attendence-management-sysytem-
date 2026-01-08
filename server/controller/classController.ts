@@ -5,6 +5,7 @@ import { getProfile } from './userController';
 import mongoose from 'mongoose';
 import User from '../schema.ts/user';
 import Attendence from '../schema.ts/Attendence';
+import { initWebSocket } from '../app';
 // import jwt from 'jsonwebtoken';
 import { getActiveSession, startActiveSession } from '../state/activeSession';
 
@@ -121,6 +122,8 @@ export const attendenceStart = async (req: Request, res: Response) => {
         try {
             
             const session = startActiveSession(classId);
+
+
             return res.status(200).json({ message: 'Attendance started successfully', session });
             
         } catch (error) {

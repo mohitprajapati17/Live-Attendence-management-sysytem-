@@ -24,6 +24,19 @@ export function startActiveSession(classId: string) {
   return activeSession;
 }
 
+export function addAttendance(studentId: string, classId: string) {
+  if (!activeSession) {
+    throw new Error("No active session");
+  }
+  if (activeSession.classId !== classId) {
+    throw new Error("Class ID does not match");
+  }
+  activeSession.attendance[studentId] = {
+    status: "present",
+    createdAt: new Date(),
+  };
+}
+
 export function endActiveSession() {
   activeSession = null;
 }
