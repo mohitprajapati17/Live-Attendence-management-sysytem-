@@ -2,6 +2,9 @@ import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import attendenceSchema from "../schema.ts/Attendence";
 import { addAttendance, getActiveSession } from "../state/activeSession";
+import Class from "../schema.ts/Class";
+import Attendance from "../schema.ts/Attendance";
+
 
 export const initWebSocket=(io: Server)=>{
 
@@ -67,23 +70,50 @@ export const initWebSocket=(io: Server)=>{
 
         
             
-            socket.on("stop-class", (classId:string) => {
-                console.log("Stop class", classId);
-            });
-      
-            console.log("Student connected", (io as any).user);
-            socket.on("ATTENDANCE_MARKED",async (data:{id:string, classId:string}) => {
-                console.log("Mark present", data);
-                const attendence = await attendenceSchema.create({
-                    studentId: data.id,
-                    classId: data.classId,
-                    date: new Date(),
-                    status: "present",
-                    createdAt: new Date(),
-                });
-                addAttendance(data.id, data.classId);
-                console.log("Attendence", attendence);
-            });
+        socket.on("DONE",async()=>{
+             if((socket as any).user?.role !== "student"){
+                return;
+             }
+             if(!getActiveSession()){
+                return;
+             }
+
+             console.log('Ending session for class:', getActiveSession()!.classId);
+             try{
+                const {classId,attendance}=getActiveSession()!;
+                const classDoc=await Class.findById(classId);
+                if(!classDoc){
+                    console.error('Class not found');
+                    return;
+                }
+
+                const attendence=classDoc.studentIds.map((id)=>{
+                    const Id=id.toString();
+                    return {
+                        classId,
+                        studentId: Id,
+                        status: attendance[Id] ? "present" : "absent",
+                        date: new Date()
+                    }
+                })
+
+                await Attendance.insertMany(attendence);
+                const summ={
+                    classId,
+                    totalStudents:classDoc.studentIds.length,
+                    presentStudents:attendence.filter(a=>a.status==='present').length,
+                    absentStudents:attendence.filter(a=>a.status==='absent').length,
+                    date:new Date()
+                }
+                io.emit("SESSION_ENDED",summ);
+             }catch(error){
+                console.error('Error ending session:', error);
+             }
+        })
+
+        socket.on('disconnect', () => {
+            console.log('User disconnected');
+        });
         
     });
 }
