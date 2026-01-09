@@ -10,6 +10,6 @@
     "rootDir": ".",
     "baseUrl": "."
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "schema"],
   "exclude": ["node_modules"]
 }

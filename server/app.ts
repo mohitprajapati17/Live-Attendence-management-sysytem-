@@ -1,7 +1,7 @@
 import express from 'express'
 import { authorize } from 'middleware/authorize';
 import userRoutes from './routes/userRoutes';
-import user from 'schema.ts/user';
+import user from 'schema/user';
 import { restricTo } from 'middleware/authorize';
 import { classRouter } from './routes/classRoutes';
 import { createServer } from 'node:http';
@@ -19,11 +19,11 @@ const PORT: number = 3000;
 initWebSocket(io);
 
 app.use("/auth", userRoutes);
-app.use("/auth/profile",authorize,restricTo(["teacher","student"]),userRoutes);
+app.use("/auth/profile", authorize, restricTo(["teacher", "student"]), userRoutes);
 
-app.use("/",authorize,restricTo(["teacher"]),classRouter);
-app.use("class/:id",authorize,restricTo(["teacher","student"]),classRouter);
-app.use("/class/:id/my-attendence",authorize,restricTo(["student"]),classRouter);
+app.use("/", authorize, restricTo(["teacher"]), classRouter);
+app.use("class/:id", authorize, restricTo(["teacher", "student"]), classRouter);
+app.use("/class/:id/my-attendence", authorize, restricTo(["student"]), classRouter);
 
 
 server.listen(PORT, () => {

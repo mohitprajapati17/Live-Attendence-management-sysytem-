@@ -3,9 +3,9 @@ import { getProfile, Signin, Signup } from '../controller/userController';
 
 const router = Router();
 
-router.get('/',getProfile);
-router.get("/sign-in",Signin);
-router.get("sign-up",Signup);
+router.get('/', getProfile);
+router.post("/sign-in", Signin);
+router.post("/sign-up", Signup);
 
 
 

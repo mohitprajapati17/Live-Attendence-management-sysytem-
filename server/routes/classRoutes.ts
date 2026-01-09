@@ -7,7 +7,7 @@ router.post("class/", createClass);
 router.post("class/:id/add-student", addStudent);
 router.get("/", getClass);
 router.get("class/students", getStudent);
-router.get("/",myAttendenceByClassId);
+router.get("/my-attendence",myAttendenceByClassId);
 router.post("/attendence/start",attendenceStart)
 
 export const classRouter=router;
