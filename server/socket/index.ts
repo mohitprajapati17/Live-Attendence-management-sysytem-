@@ -47,8 +47,22 @@ export const initWebSocket=(io: Server)=>{
                 socket.emit('TODAY_SUMMARY', { presentCount: 0, presentStudentIds: [] });
                 return;
             }
-            const summary = getActiveSession()?.attendance;
-            socket.emit("TODAY_SUMMARY", summary);
+            const presentStudentIds = Object.keys(getActiveSession()!.attendance);
+            const presentCount = presentStudentIds.length;
+            socket.emit("TODAY_SUMMARY", { presentCount, presentStudentIds });
+        })
+
+        socket.on('CHECK_MY_STATUS',()=>{
+            if((socket as any).user?.role !== "student"){
+                return;
+            }
+            if(!getActiveSession()){
+                socket.emit("MY_STATUS", { isPresent: null });
+                return;
+                
+            }
+            const status=getActiveSession()!.attendance[(socket as any).user?.id]?'present':null;
+            socket.emit("MY_STATUS", { isPresent: status });
         })
 
         
