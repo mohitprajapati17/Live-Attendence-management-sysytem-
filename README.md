@@ -1,9 +1,8 @@
 # Live Attendance Management System
 
-A real-time attendance tracking system with client and server components.
+A real-time attendance tracking system with server components.
 
 ## Project Structure
-- `client/` - Frontend application
 - `server/` - Backend server
 
 ## Getting Started
