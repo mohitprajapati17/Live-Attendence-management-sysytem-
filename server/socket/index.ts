@@ -24,7 +24,7 @@ export const initWebSocket=(io: Server)=>{
     io.on("connection", (socket) => {
         console.log("User connected", socket.id);
 
-        socket.on("Mark -Attendance", (data:{studentId:string}) => {
+        socket.on("Mark-Attendance", (data:{studentId:string}) => {
            if((socket as any).user?.role !== "student"){
             return;
            }
@@ -37,6 +37,19 @@ export const initWebSocket=(io: Server)=>{
            io.emit("ATTENDANCE_MARKED", {studentId,status:"present"});
 
         });
+
+
+        socket.on("GET_TODAY_SUMMARY",()=>{
+            if((socket as any).user?.role !== "teacher"){
+                return;
+            }
+            if (!getActiveSession()) {
+                socket.emit('TODAY_SUMMARY', { presentCount: 0, presentStudentIds: [] });
+                return;
+            }
+            const summary = getActiveSession()?.attendance;
+            socket.emit("TODAY_SUMMARY", summary);
+        })
 
         
             
